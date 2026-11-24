@@ -133,7 +133,7 @@ export default function LiarOnline({
 
   /* ─────────────── 투표 ─────────────── */
   if (phase === 'liar_vote') {
-    const voted = snapshot.myVote ?? target;
+    const voted = snapshot.myVote;
     return (
       <div>
         <div className="panel mt-1 px-4 py-5 text-center">
@@ -166,7 +166,7 @@ export default function LiarOnline({
                 .finally(() => setSubmitting(false));
             }}
           >
-            {voted ? '투표 바꾸기' : '지목하고 투표하기'}
+            {voted ? '내 투표 바꾸기' : '지목하고 투표하기'}
           </Button>
           {snapshot.myVote && (
             <p className="text-center text-[11.5px] text-mint">

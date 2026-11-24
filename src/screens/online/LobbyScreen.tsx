@@ -26,7 +26,7 @@ export default function LobbyScreen({
   onRoom: (roomId: string) => void;
   onExit: () => void;
 }) {
-  const { profile, signOut, updateNickname } = useOnlineAuth();
+  const { profile, signOut, updateNickname, refreshProfile } = useOnlineAuth();
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -49,11 +49,12 @@ export default function LobbyScreen({
   }, []);
 
   useEffect(() => {
+    void refreshProfile();
     void onlineApi.cleanup().catch(() => null);
     void refresh();
     const id = window.setInterval(() => void refresh(), 6000);
     return () => window.clearInterval(id);
-  }, [refresh]);
+  }, [refresh, refreshProfile]);
 
   async function quickMatch(game: OnlineGame) {
     if (busy) return;

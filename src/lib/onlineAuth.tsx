@@ -28,11 +28,15 @@ export function OnlineAuthProvider({ children }: { children: ReactNode }) {
 
   const loadProfile = useCallback(async () => {
     if (!supabase) return;
-    try {
-      const next = await onlineApi.myProfile();
-      setProfile(next);
-    } catch {
-      setProfile(null);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const next = await onlineApi.myProfile();
+        setProfile(next);
+        return;
+      } catch {
+        if (attempt === 2) setProfile(null);
+        else await new Promise((resolve) => window.setTimeout(resolve, 300));
+      }
     }
   }, []);
 
@@ -82,6 +86,7 @@ export function OnlineAuthProvider({ children }: { children: ReactNode }) {
         const login = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (login.error) return { ok: false, error: authErrorMessage(login.error.message) };
       }
+      setUser(data.user ?? (await supabase.auth.getUser()).data.user ?? null);
       await loadProfile();
       return { ok: true };
     },

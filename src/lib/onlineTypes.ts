@@ -76,6 +76,7 @@ export type RoomInfo = {
 
 export type Snapshot = {
   serverNow: number;
+  meId: string;
   room: RoomInfo;
   players: RoomPlayer[];
   me: RoleInfo | null;

@@ -283,7 +283,7 @@ export default function MafiaOnline({
                     .finally(() => setSubmitting(false));
                 }}
               >
-                {snapshot.myVote ? '투표 바꾸기' : '투표하기'}
+                {snapshot.myVote ? '내 투표 바꾸기' : '투표하기'}
               </Button>
             </div>
           </>

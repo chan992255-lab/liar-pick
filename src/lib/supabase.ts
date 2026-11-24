@@ -6,9 +6,29 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 /** Supabase 환경변수가 없으면 온라인 모드는 '준비 중'으로 표시된다. */
 export const hasCloud = Boolean(url && anonKey);
 
+/**
+ * 한 기기에서 계정 두 개로 동시에 접속할 때 쓰는 슬롯별 세션 저장소.
+ * 주소에 ?slot=b 를 붙이면 그 슬롯의 로그인만 따로 보관한다(기본 슬롯은 기존 키 그대로).
+ */
+function slotStorage(slot: string | null) {
+  const key = (name: string) => (slot ? `liarpick:${slot}:${name}` : `liarpick:${name}`);
+  return {
+    getItem: (name: string) => window.localStorage.getItem(key(name)),
+    setItem: (name: string, value: string) => window.localStorage.setItem(key(name), value),
+    removeItem: (name: string) => window.localStorage.removeItem(key(name)),
+  };
+}
+
+const slot = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('slot') : null;
+
 export const supabase: SupabaseClient | null = hasCloud
   ? createClient(url as string, anonKey as string, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+        storage: slotStorage(slot),
+      },
     })
   : null;
 

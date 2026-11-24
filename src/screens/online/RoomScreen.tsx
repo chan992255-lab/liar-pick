@@ -31,8 +31,8 @@ export default function RoomScreen({ roomId, onExit }: { roomId: string; onExit:
   const [settingsOpen, setSettingsOpen] = useState(false);
   const advancingRef = useRef('');
 
-  const me = snapshot?.players.find((player) => player.userId === user?.id) ?? null;
-  const isHost = snapshot?.room.hostId === user?.id;
+  const me = snapshot?.players.find((player) => player.userId === (snapshot?.meId ?? user?.id)) ?? null;
+  const isHost = snapshot ? snapshot.room.hostId === snapshot.meId : false;
 
   const act = useCallback(
     async (fn: () => Promise<unknown>) => {
@@ -211,6 +211,16 @@ function Lobby({
   const minPlayers = GAME_META[room.game].minPlayers;
   const readyCount = snapshot.players.filter((player) => player.isReady).length;
   const canStart = snapshot.players.length >= minPlayers;
+  const config = room.config as Record<string, unknown>;
+  const categoryEmoji = (config.categoryEmoji as string) ?? (room.state.categoryEmoji as string) ?? '🎲';
+  const categoryLabel = (config.categoryLabel as string) ?? (room.state.categoryLabel as string) ?? '제시어';
+  const mode = (config.mode as string) ?? (room.state.mode as string) ?? 'normal';
+  const discussSeconds = (config.seconds as number) ?? (room.state.discussSeconds as number) ?? 180;
+  const voteMode = (config.voteMode as string) ?? (room.state.voteMode as string) ?? 'secret';
+  const nightSeconds = (config.nightSeconds as number) ?? (room.state.nightSeconds as number) ?? 45;
+  const mafiaCount = (config.mafia as number) ?? (room.state.mafia as number) ?? 1;
+  const policeCount = (config.police as number) ?? (room.state.police as number) ?? 1;
+  const doctorCount = (config.doctor as number) ?? (room.state.doctor as number) ?? 0;
 
   return (
     <div>
@@ -223,17 +233,13 @@ function Lobby({
         </div>
         <p className="mt-2 text-[15px] font-extrabold">
           {room.game === 'liar'
-            ? `${room.state.categoryEmoji ?? '🎲'} ${room.state.categoryLabel ?? '제시어'} · ${
-                room.state.mode === 'fool' ? '바보 모드' : '일반 모드'
-              }`
-            : `마피아 ${room.state.mafia ?? 1} · 경찰 ${room.state.police ?? 1} · 의사 ${room.state.doctor ?? 0}`}
+            ? `${categoryEmoji} ${categoryLabel} · ${mode === 'fool' ? '바보 모드' : '일반 모드'}`
+            : `마피아 ${mafiaCount} · 경찰 ${policeCount} · 의사 ${doctorCount}`}
         </p>
         <p className="mt-1 text-[11.5px] leading-relaxed text-sub">
           {room.game === 'liar'
-            ? `토론 ${Math.round(((room.state.discussSeconds as number) ?? 180) / 60)}분 · ${
-                room.state.voteMode === 'open' ? '지목 투표' : '비밀 투표'
-              }`
-            : `밤 ${room.state.nightSeconds ?? 45}초 · 낮 토론 ${Math.round(((room.state.discussSeconds as number) ?? 180) / 60)}분`}
+            ? `토론 ${Math.round(discussSeconds / 60)}분 · ${voteMode === 'open' ? '지목 투표' : '비밀 투표'}`
+            : `밤 ${nightSeconds}초 · 낮 토론 ${Math.round(discussSeconds / 60)}분`}
         </p>
         {isHost && (
           <button onClick={onOpenSettings} className="press mt-2 text-[11.5px] font-bold text-purple">
@@ -317,21 +323,22 @@ function HostSettings({
   act: RoomActor['act'];
 }) {
   const room = snapshot.room;
+  const baseConfig = room.config as Record<string, unknown>;
   const [liar, setLiar] = useState<LiarConfig>({
-    categoryId: (room.state.categoryLabel as string) ?? CATEGORIES[0].id,
-    categoryLabel: (room.state.categoryLabel as string) ?? CATEGORIES[0].label,
-    categoryEmoji: (room.state.categoryEmoji as string) ?? CATEGORIES[0].emoji,
-    mode: (room.state.mode as 'normal' | 'fool') ?? 'normal',
-    seconds: (room.state.discussSeconds as number) ?? 180,
-    voteMode: (room.state.voteMode as 'secret' | 'open') ?? 'secret',
+    categoryId: (baseConfig.categoryId as string) ?? CATEGORIES[0].id,
+    categoryLabel: (baseConfig.categoryLabel as string) ?? CATEGORIES[0].label,
+    categoryEmoji: (baseConfig.categoryEmoji as string) ?? CATEGORIES[0].emoji,
+    mode: (baseConfig.mode as 'normal' | 'fool') ?? 'normal',
+    seconds: (baseConfig.seconds as number) ?? 180,
+    voteMode: (baseConfig.voteMode as 'secret' | 'open') ?? 'secret',
   });
   const [mafia, setMafia] = useState<MafiaConfig>({
-    mafia: (room.state.mafia as number) ?? 1,
-    police: (room.state.police as number) ?? 1,
-    doctor: (room.state.doctor as number) ?? 0,
-    nightSeconds: (room.state.nightSeconds as number) ?? 45,
-    discussSeconds: (room.state.discussSeconds as number) ?? 180,
-    voteSeconds: (room.state.voteSeconds as number) ?? 60,
+    mafia: (baseConfig.mafia as number) ?? 1,
+    police: (baseConfig.police as number) ?? 1,
+    doctor: (baseConfig.doctor as number) ?? 0,
+    nightSeconds: (baseConfig.nightSeconds as number) ?? 45,
+    discussSeconds: (baseConfig.discussSeconds as number) ?? 180,
+    voteSeconds: (baseConfig.voteSeconds as number) ?? 60,
   });
 
   return (
