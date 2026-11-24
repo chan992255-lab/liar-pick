@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LiarPick">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A1E2E" />
+      <stop offset="1" stop-color="#0D0F17" />
+    </linearGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A855F7" />
+      <stop offset="1" stop-color="#7C5CFF" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <circle cx="256" cy="244" r="168" fill="url(#orb)" opacity="0.22" />
+  <circle cx="256" cy="244" r="132" fill="none" stroke="url(#orb)" stroke-width="10" opacity="0.55" />
+  <path d="M148 236c0-42 48-70 108-70s108 28 108 70c0 46-46 92-108 92s-108-46-108-92z" fill="#F5F6FC" />
+  <ellipse cx="212" cy="240" rx="26" ry="24" fill="#0D0F17" />
+  <ellipse cx="300" cy="240" rx="26" ry="24" fill="#0D0F17" />
+  <path d="M226 300c18 12 42 12 60 0" stroke="#0D0F17" stroke-width="10" stroke-linecap="round" fill="none" />
+  <circle cx="392" cy="128" r="34" fill="#FB7185" opacity="0.9" />
+</svg>
