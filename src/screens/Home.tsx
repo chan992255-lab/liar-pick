@@ -4,18 +4,22 @@ import { CATEGORIES, TOTAL_WORDS } from '../lib/words';
 import { sfx } from '../lib/sound';
 import { ScoreRows } from '../components/ScoreBoard';
 import { SoundButton } from '../components/SoundButton';
+import { useOnlineAuth } from '../lib/onlineAuth';
 import { cn } from '../lib/utils';
 
 export default function Home({
   onLiar,
   onMafia,
+  onOnline,
   onScores,
 }: {
   onLiar: () => void;
   onMafia: () => void;
+  onOnline: () => void;
   onScores: () => void;
 }) {
   const [scores] = useState(() => loadScores());
+  const { profile } = useOnlineAuth();
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
@@ -58,7 +62,44 @@ export default function Home({
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <button
+          onClick={() => {
+            sfx.tap();
+            onOnline();
+          }}
+          className="press relative mt-4 w-full overflow-hidden rounded-4xl border border-purple/40 bg-gradient-to-br from-[#1B1240] via-[#241554] to-[#120A28] px-5 py-5 text-left shadow-glow"
+        >
+          <div className="pointer-events-none absolute -bottom-8 -right-4 text-[110px] leading-none opacity-15">🌐</div>
+          <div className="relative">
+            <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white/90">
+              NEW · 실시간 온라인
+            </span>
+            <div className="mt-2.5 flex items-center gap-2">
+              <span className="text-[22px]">🌐</span>
+              <p className="text-[21px] font-black">온라인 매칭</p>
+            </div>
+            <p className="mt-1 max-w-[250px] text-[12px] leading-relaxed text-white/75">
+              로그인하고 모르는 사람과 바로 플레이. 방 코드로 친구와도 들어올 수 있어요.
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[11.5px] font-extrabold">
+                시작하기 →
+              </span>
+              {profile && (
+                <span className="truncate rounded-full bg-black/30 px-2.5 py-1 text-[10.5px] font-bold text-white/80">
+                  {profile.nickname} · {profile.games}판 {profile.wins}승
+                </span>
+              )}
+            </div>
+          </div>
+        </button>
+
+        <div className="mb-2 mt-6 flex items-end justify-between">
+          <h3 className="text-[13px] font-extrabold tracking-wide text-sub">📱 폰 하나로 같이하기</h3>
+          <span className="text-[10.5px] text-sub/70">로그인 없이 바로</span>
+        </div>
+
+        <div className="space-y-3">
           <ModeCard
             emoji="🕵️"
             title="라이어 게임"
