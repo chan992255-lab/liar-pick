@@ -65,7 +65,10 @@ export function TopBar({
   right?: ReactNode;
 }) {
   return (
-    <div className="safe-t sticky top-0 z-20 bg-gradient-to-b from-bg via-bg/95 to-bg/0 px-4 pb-3 pt-3">
+    <div
+      className="sticky top-0 z-20 bg-gradient-to-b from-bg via-bg/95 to-bg/0 px-4 pb-3"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           {onBack && (

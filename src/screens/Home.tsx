@@ -19,7 +19,10 @@ export default function Home({
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
-      <div className="safe-t px-5 pb-2 pt-4">
+      <div
+        className="px-5 pb-2"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-purple text-[19px] shadow-glow">

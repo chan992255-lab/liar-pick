@@ -10,6 +10,7 @@ import { TimerPanel } from '../../components/Timer';
 import { PlayerNameEditor, PlayerChipGrid } from '../../components/PlayerSelect';
 import { ScoreRows } from '../../components/ScoreBoard';
 import { SoundButton } from '../../components/SoundButton';
+import { GameHeaderRight } from '../../components/GameHeaderRight';
 import {
   MODE_META,
   VOTE_META,
@@ -134,7 +135,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`역할 확인 ${revealIndex + 1}/${config.players.length}`}
           subtitle={`${round.categoryEmoji} ${round.categoryLabel} · ${config.mode === 'fool' ? '바보 모드' : '일반 모드'}`}
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body flex flex-col justify-center pb-10">
           <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-line/60">
@@ -174,7 +175,9 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
             ) : (
               <div className="flex flex-col items-center">
                 <span className="text-[11px] font-extrabold tracking-[0.18em] text-sub">오늘의 제시어</span>
-                <p className="mt-2 break-keep text-[38px] font-black leading-tight text-ink">{round.liarWord}</p>
+                <p className="mt-2 break-keep text-[38px] font-black leading-tight text-ink">
+                  {isLiar ? round.liarWord : round.word}
+                </p>
                 <span className="mt-3 rounded-full border border-line bg-bg/50 px-3 py-1 text-[11px] font-bold text-sub">
                   {round.categoryEmoji} {round.categoryLabel}
                 </span>
@@ -196,7 +199,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title="🕵️ 토론 타임"
           subtitle={`${round.categoryEmoji} ${round.categoryLabel} · ${config.players.length}명`}
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body">
           <div className="panel mt-1 px-5 py-5">
@@ -210,13 +213,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
           <SectionTitle hint="한 명씩 돌아가며 한 문장">설명 순서</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {config.players.map((player, index) => (
-              <span
-                key={player.id}
-                className={cn(
-                  'chip px-3 py-1.5',
-                  player.id === round.liarId && 'border-rose/40 text-rose',
-                )}
-              >
+              <span key={player.id} className="chip px-3 py-1.5">
                 <span className="num text-sub/70">{index + 1}</span> {player.name}
               </span>
             ))}
@@ -251,7 +248,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
     if (config.voteMode === 'open') {
       return (
         <div className="flex min-h-[100dvh] flex-col">
-          <TopBar title="가장 의심되는 사람" subtitle="한 명을 지목해 주세요" right={<SoundButton />} />
+          <TopBar title="가장 의심되는 사람" subtitle="한 명을 지목해 주세요" right={<GameHeaderRight onQuit={onExit} />} />
           <div className="app-body">
             <div className="panel mt-1 px-4 py-4">
               <PlayerChipGrid
@@ -286,7 +283,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`비밀 투표 ${voteIndex + 1}/${config.players.length}`}
           subtitle="한 명씩 몰래 투표해요"
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body flex flex-col justify-center pb-10">
           <HoldReveal
@@ -324,7 +321,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
     const ranked = Object.entries(tallyResult.counts).sort((a, b) => b[1] - a[1]);
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <TopBar title="투표 결과" subtitle={`총 ${tallyResult.total}표`} right={<SoundButton />} />
+        <TopBar title="투표 결과" subtitle={`총 ${tallyResult.total}표`} right={<GameHeaderRight onQuit={onExit} />} />
         <div className="app-body">
           <div className="panel mt-1 space-y-2 px-4 py-4">
             {ranked.map(([id, count]) => {
@@ -404,7 +401,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
   if (phase === 'guess') {
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <TopBar title="😈 라이어의 마지막 기회" subtitle="정답을 맞히면 라이어 승리!" right={<SoundButton />} />
+        <TopBar title="😈 라이어의 마지막 기회" subtitle="정답을 맞히면 라이어 승리!" right={<GameHeaderRight onQuit={onExit} />} />
         <div className="app-body">
           <div className="panel mt-1 px-5 py-6 text-center">
             <p className="text-[13px] font-bold text-rose">{liar.name} 님, 제시어를 맞혀 보세요</p>
@@ -427,7 +424,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
                   const correct = isCorrectGuess(guessInput, round.word);
                   if (correct) sfx.win();
                   else sfx.lose();
-                  finishRound(true, true, correct);
+                  finishRound(correct, true, correct);
                 }}
               >
                 정답 제출
@@ -448,7 +445,7 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
   /* -------------------------------- 결과 -------------------------------- */
   return (
     <div className="flex min-h-[100dvh] flex-col">
-      <TopBar title={`${roundNo}라운드 결과`} subtitle={`${round.categoryEmoji} ${round.categoryLabel}`} right={<SoundButton />} />
+      <TopBar title={`${roundNo}라운드 결과`} subtitle={`${round.categoryEmoji} ${round.categoryLabel}`} right={<GameHeaderRight onQuit={onExit} />} />
       <div className="app-body">
         <div
           className={cn(
@@ -468,7 +465,9 @@ export default function LiarGame({ onExit }: { onExit: () => void }) {
             <p className="text-[10px] font-extrabold tracking-[0.18em] text-sub">제시어</p>
             <p className="mt-1 text-[24px] font-black">{round.word}</p>
             <p className="mt-1 text-[11px] text-sub">
-              라이어가 받은 단어 · <b className="text-ink/80">{round.liarWord}</b>
+              {config.mode === 'fool'
+                ? `라이어가 받은 단어 · ${round.liarWord}`
+                : '라이어는 제시어를 받지 않았어요'}
             </p>
           </div>
         </div>

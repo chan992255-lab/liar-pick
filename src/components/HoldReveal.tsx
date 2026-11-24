@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/utils';
 import { sfx } from '../lib/sound';
@@ -63,9 +63,30 @@ export function HoldReveal({
 }) {
   const [open, setOpen] = useState(false);
   const [peek, setPeek] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const downAt = useRef(0);
   const a = ACCENT[accent];
   const revealed = open || peek;
+
+  // 화면이 넘어가며 pointerup 대상이 바뀌어도 놓치지 않도록 window에서 받아냅니다.
+  useEffect(() => {
+    if (!pressed) return;
+    const release = () => {
+      const held = Date.now() - downAt.current;
+      setPressed(false);
+      setPeek(false);
+      if (held < 340) {
+        setOpen(true);
+      }
+      sfx.flip();
+    };
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    return () => {
+      window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointercancel', release);
+    };
+  }, [pressed]);
 
   return (
     <div className="animate-pop-in">
@@ -86,21 +107,10 @@ export function HoldReveal({
             tabIndex={0}
             onPointerDown={() => {
               downAt.current = Date.now();
+              setPressed(true);
               setPeek(true);
               sfx.unlock();
             }}
-            onPointerUp={() => {
-              const held = Date.now() - downAt.current;
-              setPeek(false);
-              if (held < 320) {
-                setOpen(true);
-                sfx.flip();
-              } else {
-                sfx.flip();
-              }
-            }}
-            onPointerLeave={() => setPeek(false)}
-            onPointerCancel={() => setPeek(false)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();

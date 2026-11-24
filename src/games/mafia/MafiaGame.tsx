@@ -10,6 +10,7 @@ import { TimerPanel } from '../../components/Timer';
 import { PlayerChipGrid, PlayerNameEditor } from '../../components/PlayerSelect';
 import { ScoreRows } from '../../components/ScoreBoard';
 import { SoundButton } from '../../components/SoundButton';
+import { GameHeaderRight } from '../../components/GameHeaderRight';
 import { defaultNames, resizeNames, toPlayers } from '../liar/engine';
 import {
   alivePlayers,
@@ -228,7 +229,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`비밀 역할 ${revealIndex + 1}/${players.length}`}
           subtitle={`${config.mafia} 마피아 · ${config.police} 경찰 · ${config.doctor} 의사`}
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body flex flex-col justify-center pb-10">
           <HoldReveal
@@ -252,7 +253,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
                   {mates.length ? `동료 마피아 · ${mates.join(', ')}` : '동료 없이 혼자 싸우는 마피아'}
                 </div>
               )}
-              {actor.role !== 'mafia' && (
+              {(actor.role === 'police' || actor.role === 'doctor') && (
                 <div className="mt-3 rounded-xl border border-line bg-bg/50 px-3 py-2 text-[11px] text-sub">
                   낮에는 시민처럼 토론하고 투표하세요.
                 </div>
@@ -270,7 +271,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
     if (!actor) {
       return (
         <div className="flex min-h-[100dvh] flex-col">
-          <TopBar title="밤" right={<SoundButton />} />
+          <TopBar title="밤" right={<GameHeaderRight onQuit={onExit} />} />
           <div className="app-body flex items-center justify-center">
             <Button onClick={() => setPhase('morning')}>계속</Button>
           </div>
@@ -292,7 +293,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`🌙 ${dayNo}일차 밤`}
           subtitle={`${nightIndex + 1}/${alive.length}번째 차례`}
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body flex flex-col justify-center pb-10">
           <HoldReveal
@@ -378,7 +379,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
   if (phase === 'morning') {
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <TopBar title={`🌅 ${dayNo}일차 아침`} subtitle="간밤의 소식" right={<SoundButton />} />
+        <TopBar title={`🌅 ${dayNo}일차 아침`} subtitle="간밤의 소식" right={<GameHeaderRight onQuit={onExit} />} />
         <div className="app-body">
           <div
             className={cn(
@@ -441,14 +442,14 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`☀️ ${dayNo}일차 낮`}
           subtitle={`생존 ${alive.length}명 · 마피아를 찾아라`}
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body">
           <div className="panel mt-1 px-5 py-5">
             <TimerPanel seconds={config.seconds} accent="mint" label="의심 가는 사람을 이야기해 보세요" />
           </div>
 
-          <SectionTitle hint="탭하면 그 사람의 기록">생존자</SectionTitle>
+          <SectionTitle hint={`${alive.length}명`}>생존자</SectionTitle>
           <div className="grid grid-cols-2 gap-2">
             {alive.map((player) => (
               <div
@@ -506,7 +507,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
         <TopBar
           title={`처형 투표 ${voteIndex + 1}/${alive.length}`}
           subtitle="한 명씩 몰래 투표해요"
-          right={<SoundButton />}
+          right={<GameHeaderRight onQuit={onExit} />}
         />
         <div className="app-body flex flex-col justify-center pb-10">
           <HoldReveal
@@ -543,7 +544,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
     const ranked = Object.entries(tallyInfo.counts).sort((a, b) => b[1] - a[1]);
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <TopBar title="처형 결과" subtitle={`총 ${tallyInfo.total}표`} right={<SoundButton />} />
+        <TopBar title="처형 결과" subtitle={`총 ${tallyInfo.total}표`} right={<GameHeaderRight onQuit={onExit} />} />
         <div className="app-body">
           <div className="panel mt-1 space-y-2 px-4 py-4">
             {ranked.map(([id, count]) => {
@@ -602,7 +603,7 @@ export default function MafiaGame({ onExit }: { onExit: () => void }) {
   if (phase === 'result' && winner) {
     return (
       <div className="flex min-h-[100dvh] flex-col">
-        <TopBar title="게임 결과" subtitle={`${dayNo}일차 종료`} right={<SoundButton />} />
+        <TopBar title="게임 결과" subtitle={`${dayNo}일차 종료`} right={<GameHeaderRight onQuit={onExit} />} />
         <div className="app-body">
           <div
             className={cn(
